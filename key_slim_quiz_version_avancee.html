@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Bien-être & Perte de Poids – Funnel Complet</title>
+
+  <!-- TRACKING (remplacer par vos IDs) -->
+  <!-- Meta Pixel / Google Tag ici -->
+
+  <style>
+    body{font-family:Segoe UI,Tahoma,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .container{background:#fff;max-width:900px;width:100%;border-radius:16px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    h1{text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;color:transparent}
+    .progress{height:8px;background:#e0e0e0;border-radius:10px;margin:30px 0;overflow:hidden}
+    .progress span{display:block;height:100%;width:0;background:linear-gradient(135deg,#667eea,#764ba2);transition:.3s}
+    .question{display:none}
+    .question.active{display:block;animation:fade .4s}
+    @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1}}
+    .options label{display:block;background:#f4f4f4;padding:14px 18px;border-radius:8px;margin-bottom:12px;cursor:pointer;border:2px solid transparent}
+    input[type=radio]{display:none}
+    input[type=radio]:checked+label{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .nav{display:flex;gap:10px;margin-top:25px}
+    button{padding:12px 25px;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+    .next{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;flex:1}
+    .prev{background:#ddd}
+    .results{display:none;text-align:center}
+    .results.active{display:block}
+    .box{background:#f0f4ff;padding:20px;border-radius:10px;margin:20px 0;text-align:left}
+    .cta{display:inline-block;margin-top:20px;padding:15px 40px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;border-radius:8px;font-weight:600}
+    .email-box{background:#fff3cd;padding:20px;border-radius:10px;margin-top:20px}
+    .disclaimer{font-size:.85em;color:#555;margin-top:20px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Quiz Bien-être Personnalisé</h1>
+  <p style="text-align:center">Analyse de vos habitudes + recommandations ciblées</p>
+
+  <div class="progress"><span id="bar"></span></div>
+
+  <div id="quiz">
+    <div class="question active" data-tag="goal">
+      <h3>Quel est votre objectif principal ?</h3>
+      <div class="options">
+        <input id="q1a" type="radio" name="q1" value="5"><label for="q1a">Perdre beaucoup de poids</label>
+        <input id="q1b" type="radio" name="q1" value="3"><label for="q1b">Me raffermir</label>
+        <input id="q1c" type="radio" name="q1" value="1"><label for="q1c">Maintenir ma forme</label>
+      </div>
+    </div>
+
+    <div class="question" data-tag="craving">
+      <h3>Avez-vous souvent des fringales ?</h3>
+      <div class="options">
+        <input id="q2a" type="radio" name="q2" value="5"><label for="q2a">Très souvent</label>
+        <input id="q2b" type="radio" name="q2" value="3"><label for="q2b">Parfois</label>
+        <input id="q2c" type="radio" name="q2" value="1"><label for="q2c">Rarement</label>
+      </div>
+    </div>
+
+    <div class="question" data-tag="sleep">
+      <h3>Comment est votre sommeil ?</h3>
+      <div class="options">
+        <input id="q3a" type="radio" name="q3" value="5"><label for="q3a">Mauvais</label>
+        <input id="q3b" type="radio" name="q3" value="3"><label for="q3b">Correct</label>
+        <input id="q3c" type="radio" name="q3" value="1"><label for="q3c">Excellent</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <h2>Vos résultats personnalisés</h2>
+    <p id="score"></p>
+
+    <div class="box" id="analysis"></div>
+
+    <div class="email-box">
+      <strong>Recevez votre plan personnalisé gratuit</strong>
+      <p>PDF + conseils adaptés à votre profil (zéro spam)</p>
+      <input type="email" id="email" placeholder="Votre email" style="padding:10px;width:100%;margin:10px 0">
+      <button class="next" onclick="captureEmail()">Recevoir mon plan</button>
+    </div>
+
+    <a class="cta" href="https://getkeyslimdrops.cc/vsl1/#aff=UtiliGo" target="_blank" onclick="trackCTA()">Découvrir KeySlim Drops</a>
+
+    <div class="disclaimer">
+      Ce quiz est fourni à titre informatif uniquement et ne remplace pas un avis médical. Les résultats peuvent varier.
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="prev" onclick="prev()">← Retour</button>
+    <button class="next" onclick="next()">Suivant →</button>
+  </div>
+</div>
+
+<script>
+  const questions=[...document.querySelectorAll('.question')];
+  let i=0;const answers=JSON.parse(localStorage.getItem('quizAnswers'))||{};
+  const bar=document.getElementById('bar');
+
+  function update(){bar.style.width=((i)/questions.length*100)+'%'}
+
+  function next(){
+    const q=questions[i];
+    const checked=q.querySelector('input:checked');
+    if(!checked){alert('Choisissez une réponse');return}
+    answers[q.dataset.tag]=parseInt(checked.value);
+    localStorage.setItem('quizAnswers',JSON.stringify(answers));
+    q.classList.remove('active');
+    i++;
+    if(i<questions.length){questions[i].classList.add('active');update()}
+    else showResults();
+  }
+
+  function prev(){if(i===0)return;questions[i].classList.remove('active');i--;questions[i].classList.add('active');update()}
+
+  function showResults(){
+    document.querySelector('.nav').style.display='none';
+    document.getElementById('results').classList.add('active');
+    const total=Object.values(answers).reduce((a,b)=>a+b,0);
+    document.getElementById('score').innerText=`Score global : ${total}`;
+
+    let txt='';
+    if(answers.craving>=4)txt+='• Fringales fréquentes → soutien pour la régulation de l’appétit recommandé.<br>';
+    if(answers.sleep>=4)txt+='• Sommeil perturbé → impact hormonal possible sur le poids.<br>';
+    if(answers.goal>=4)txt+='• Objectif ambitieux → approche structurée conseillée.<br>';
+    if(!txt)txt='Vos habitudes sont globalement solides. Une optimisation légère peut suffire.';
+
+    document.getElementById('analysis').innerHTML=txt;
+    console.log('EVENT: quiz_completed',answers);
+  }
+
+  function captureEmail(){
+    const email=document.getElementById('email').value;
+    if(!email.includes('@')){alert('Email invalide');return}
+    console.log('EVENT: lead_captured',email,answers);
+    alert('Votre plan est en cours d’envoi 👌');
+  }
+
+  function trackCTA(){console.log('EVENT: cta_clicked')}
+
+  update();
+</script>
+</body>
+</html>
